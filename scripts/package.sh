@@ -16,6 +16,8 @@ archive="dist/Rheo-$version-universal.zip"
 ARCHS="arm64 x86_64" ./scripts/build.sh
 xcrun lipo dist/Rheo.app/Contents/MacOS/rheo -verify_arch arm64 x86_64
 codesign --verify --deep --strict --verbose=2 dist/Rheo.app
+cmp LICENSE dist/Rheo.app/Contents/Resources/LICENSE
+cmp THIRD_PARTY_NOTICES.md dist/Rheo.app/Contents/Resources/THIRD_PARTY_NOTICES.md
 
 submission=$(mktemp -d "${TMPDIR:-/tmp}/rheo-notarization.XXXXXX")
 trap 'rm -rf "$submission"' EXIT

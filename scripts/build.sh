@@ -31,6 +31,8 @@ mkdir -p dist/Rheo.app/Contents/MacOS
 if [[ ${#binaries[@]} == 1 ]]; then cp "${binaries[0]}" dist/Rheo.app/Contents/MacOS/rheo
 else xcrun lipo -create "${binaries[@]}" -output dist/Rheo.app/Contents/MacOS/rheo; fi
 cp src/macos/Info.plist dist/Rheo.app/Contents/Info.plist
+mkdir -p dist/Rheo.app/Contents/Resources
+cp LICENSE THIRD_PARTY_NOTICES.md dist/Rheo.app/Contents/Resources/
 sign_flags=()
 if [[ ${SIGN_IDENTITY:--} != - ]]; then
   sign_flags=(--options runtime --timestamp)
