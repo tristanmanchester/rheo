@@ -40,6 +40,8 @@ jobs:
         run: ARCHS="arm64 x86_64" ./scripts/build.sh
       - name: CLI smoke test (no input posted)
         run: dist/Rheo.app/Contents/MacOS/rheo --help
+      - name: App defaults and preferences survive relaunch
+        run: ./tests/resident-preferences.sh
   miri:
     if: github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-24.04
