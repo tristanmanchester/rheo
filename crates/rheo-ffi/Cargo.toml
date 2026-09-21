@@ -1,0 +1,17 @@
+[package]
+name = "rheo-ffi"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+description = "Narrow C ABI for the Rheo Rust core"
+
+[lib]
+name = "rheo_ffi"
+crate-type = ["staticlib", "rlib"]
+
+[dependencies]
+rheo-core = { path = "../rheo-core" }
+
+[lints]
+workspace = true

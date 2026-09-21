@@ -1,0 +1,6 @@
+upstream_source_sha256=e7ebc88fee331a8263a7fff4d658517c5840764095b115e1cd166f6965165659
+REPRODUCED: native overlay began passes but cancelled is swallowed
+REPRODUCED: disable during swipe leaves tracking set after ended
+REPRODUCED: NaN progress triggers a switch
+REPRODUCED: zero-motion began suppressed but orphan ended passed
+4/4 upstream control-flow defects reproduced with platform stubs.

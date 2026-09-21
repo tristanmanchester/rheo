@@ -1,0 +1,7 @@
+HARNESS SELF-TEST ONLY: unprefixed C reference versus prefixed C reference.
+Rust was NOT compiled or executed in this test.
+
+PASS: 1,000,000 differential gesture inputs plus feedback
+PASS: 200,000 differential prediction steps with commits
+PASS: 100,000 byte-exact payload/fixed-point comparisons
+PASS: 22 differential batch success/failure/direction cases

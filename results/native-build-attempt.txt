@@ -1,0 +1,1 @@
+The native app requires macOS + Apple Command Line Tools.

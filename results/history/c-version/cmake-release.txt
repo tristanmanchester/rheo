@@ -1,0 +1,42 @@
+-- The C compiler identification is GNU 14.2.0
+-- Detecting C compiler ABI info
+-- Detecting C compiler ABI info - done
+-- Check for working C compiler: /usr/bin/cc - skipped
+-- Detecting C compile features
+-- Detecting C compile features - done
+-- Configuring done (0.8s)
+-- Generating done (0.0s)
+-- Build files have been written to: /mnt/data/strafe-next/build/cmake-check
+[ 22%] Building C object CMakeFiles/strafe_core.dir/src/core/prediction.c.o
+[ 22%] Building C object CMakeFiles/strafe_core.dir/src/core/gesture.c.o
+[ 33%] Building C object CMakeFiles/strafe_core.dir/src/core/payload.c.o
+[ 44%] Building C object CMakeFiles/strafe_core.dir/src/core/batch.c.o
+[ 55%] Linking C static library libstrafe_core.a
+[ 55%] Built target strafe_core
+[ 66%] Building C object CMakeFiles/core_tests.dir/tests/core_tests.c.o
+[ 77%] Building C object CMakeFiles/core_bench.dir/bench/core_bench.c.o
+[ 88%] Linking C executable core_bench
+[ 88%] Built target core_bench
+[100%] Linking C executable core_tests
+[100%] Built target core_tests
+Internal ctest changing into directory: /mnt/data/strafe-next/build/cmake-check
+Test project /mnt/data/strafe-next/build/cmake-check
+    Start 1: core
+1/1 Test #1: core .............................   Passed    0.05 sec
+
+100% tests passed, 0 tests failed out of 1
+
+Total Test time (real) =   0.06 sec
+[ 55%] Built target strafe_core
+[ 66%] Building C object CMakeFiles/core_bench.dir/bench/core_bench.c.o
+[ 88%] Built target core_tests
+[100%] Linking C executable core_bench
+[100%] Built target core_bench
+Internal ctest changing into directory: /mnt/data/strafe-next/build/cmake-check
+Test project /mnt/data/strafe-next/build/cmake-check
+    Start 1: core
+1/1 Test #1: core .............................   Passed    0.04 sec
+
+100% tests passed, 0 tests failed out of 1
+
+Total Test time (real) =   0.05 sec

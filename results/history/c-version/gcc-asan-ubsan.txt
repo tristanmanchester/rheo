@@ -1,0 +1,40 @@
+ok 1 - test_one_switch_per_gesture
+ok 2 - test_native_cancellation_is_not_swallowed
+ok 3 - test_disable_drains_committed_gesture
+ok 4 - test_disable_replays_pending_gesture
+ok 5 - test_nan_and_infinity_never_choose_direction
+ok 6 - test_minimum_progress_is_optional
+ok 7 - test_direction_inversion_and_terminal_fallback
+ok 8 - test_uncommitted_failure_replays_native
+ok 9 - test_edges_never_release_moving_terminal
+ok 10 - test_zero_motion_replays_begin_not_just_end
+ok 11 - test_foreign_events_do_not_change_ownership
+ok 12 - test_lost_end_and_clock_regression_recover
+ok 13 - test_duplicate_begin_is_new_ownership_boundary
+ok 14 - test_cancelled_owned_gesture_is_closed
+ok 15 - test_topology_rejects_missing_duplicate_or_overflow
+ok 16 - test_predictions_block_both_edges
+ok 17 - test_pending_targets_survive_intermediate_ack
+ok 18 - test_post_failure_does_not_advance_prediction
+ok 19 - test_duplicate_commit_is_rejected
+ok 20 - test_topology_reorder_invalidates_pending
+ok 21 - test_external_switch_adopts_live_state
+ok 22 - test_stale_snapshot_is_not_used
+ok 23 - test_expired_unacknowledged_post_is_not_retried_blindly
+ok 24 - test_pending_capacity_is_bounded
+ok 25 - test_query_started_before_post_does_not_erase_pending
+ok 26 - test_forged_plan_cannot_commit
+ok 27 - test_fixed1616_is_defined_at_extremes
+ok 28 - test_payload_byte_layout_and_size
+ok 29 - test_payload_rejects_short_buffers_without_writes
+ok 30 - test_prepare_failure_never_posts_partial_gesture
+ok 31 - test_batch_direction_phase_order_and_cleanup
+ok 32 - test_invalid_batch_parameters_allocate_nothing
+ok 33 - test_one_million_adversarial_events
+PASS: 33 test groups, including 1,000,000 adversarial events.
+upstream_source_sha256=e7ebc88fee331a8263a7fff4d658517c5840764095b115e1cd166f6965165659
+REPRODUCED: native overlay began passes but cancelled is swallowed
+REPRODUCED: disable during swipe leaves tracking set after ended
+REPRODUCED: NaN progress triggers a switch
+REPRODUCED: zero-motion began suppressed but orphan ended passed
+4/4 upstream control-flow defects reproduced with platform stubs.

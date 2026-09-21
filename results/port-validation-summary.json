@@ -1,0 +1,40 @@
+{
+  "version": "0.2.0",
+  "date": "2026-09-21",
+  "source_archive_sha256": "9848a669bc61b003c474d6fefe348f7b9f4eed16d2bdd1009568d511b9c51dab",
+  "rust_source_compiled": false,
+  "rust_tests_executed": false,
+  "rust_c_differential_executed": false,
+  "rust_c_abi_executed": false,
+  "rust_benchmarks_executed": false,
+  "native_macos_compiled": false,
+  "rustfmt_executed": false,
+  "clippy_executed": false,
+  "ci_executed": false,
+  "reason": "No rustc/cargo or macOS SDK; Rust toolchain download attempts failed.",
+  "supplied_rust_tests": 29,
+  "retained_c_test_groups": 33,
+  "executed": {
+    "c_reference_asan_ubsan_groups": 33,
+    "c_reference_adversarial_inputs": 1000000,
+    "differential_harness_self_test": "C versus C only",
+    "c_header_syntax": "C17 and C++17 passed",
+    "c_driver_syntax": "passed",
+    "shell_syntax": "passed",
+    "python_syntax": "passed",
+    "upstream_swift_reproductions": 4
+  },
+  "unchanged_source_checks": {
+    "src/macos/main.m": true,
+    "src/macos/platform.m": true,
+    "src/macos/runtime.m": true,
+    "tests/core_tests.c": true,
+    "tests/reference/c/batch.c": true,
+    "tests/reference/c/gesture.c": true,
+    "tests/reference/c/payload.c": true,
+    "tests/reference/c/prediction.c": true,
+    "tests/reference/c/strafe_core.h": true
+  },
+  "host": "Linux-6.18.44-x86_64-with-glibc2.41",
+  "clang": "clang version 17.0.0 (https://github.com/swiftlang/llvm-project.git 10999b6d034fe318f3d56c83bddb6572593a8bb0)"
+}

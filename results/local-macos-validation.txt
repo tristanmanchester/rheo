@@ -1,0 +1,219 @@
+Local macOS validation: 2026-09-21
+macOS 26.2 (25C56), arm64, rustc 1.97.0
+Tests completed successfully, with a UBSan diagnostic in dispatch/once.h. Physical input was not tested.
+
+=== local-tests ===
+   Compiling rheo-core v0.2.0 (<checkout>/crates/rheo-core)
+   Compiling rheo-ffi v0.2.0 (<checkout>/crates/rheo-ffi)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 1.29s
+     Running unittests src/lib.rs (target/debug/deps/rheo_core-53b4469ff78980a7)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/regressions.rs (target/debug/deps/regressions-7375899c615dccfc)
+
+running 21 tests
+test backwards_clock_recovers_without_replaying_old_input ... ok
+test batch_descriptor_shapes_and_legacy_subnormal_match ... ok
+test corrupted_foreign_lengths_cannot_index_out_of_bounds ... ok
+test fixed_point_extremes_are_saturated_or_rejected ... ok
+test forged_and_duplicate_commits_are_rejected ... ok
+test generation_overflow_has_c_unsigned_wrap_semantics ... ok
+test intermediate_ack_keeps_later_targets ... ok
+test invalid_motion_and_zero_end_replay_the_prefix ... ok
+test invalid_threshold_and_smallest_movement_remain_defined ... ok
+test invalid_topology_is_rejected_without_mutating_state ... ok
+test modern_direction_and_terminal_feedback ... ok
+test native_cancel_passes_through ... ok
+test one_switch_per_swipe_and_committed_disable_drains ... ok
+test owning_batch_drops_every_prior_event_at_every_failure_position ... ok
+test payload_all_short_buffers_and_invalid_phases_leave_bytes_untouched ... ok
+test payload_is_byte_exact_and_does_not_touch_tail ... ok
+test pending_capacity_and_timeout_are_bounded ... ok
+test successful_batch_owns_then_releases_all_events ... ok
+test uncommitted_disable_replays ... ok
+test unknown_foreign_values_are_not_rust_enum_undefined_behavior ... ok
+test million_event_adversarial_stream ... ok
+
+test result: ok. 21 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.06s
+
+     Running unittests src/lib.rs (target/debug/deps/rheo_ffi-e9baadbe7a5ff149)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/boundary.rs (target/debug/deps/boundary-6334241f533e24ee)
+
+running 8 tests
+test corrupt_batch_count_and_missing_callbacks_are_rejected ... ok
+test encoder_accepts_uninitialized_output_and_caps_a_large_capacity ... ok
+test ffi_batch_failure_cleans_up_and_success_transfers_ownership ... ok
+test null_arguments_are_rejected ... ok
+test layout_query_handles_unknown_ids_and_slots ... ok
+test reset_and_plan_outputs_accept_uninitialized_storage ... ok
+test rejected_plan_does_not_touch_output ... ok
+test short_and_invalid_payloads_leave_output_unchanged ... ok
+
+test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests rheo_core
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests rheo_ffi
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Compiling rheo-core v0.2.0 (<checkout>/crates/rheo-core)
+   Compiling rheo-ffi v0.2.0 (<checkout>/crates/rheo-ffi)
+    Finished `release` profile [optimized] target(s) in 4.36s
+     Running unittests src/lib.rs (target/release/deps/rheo_core-6eed5ff609a3e3cf)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/regressions.rs (target/release/deps/regressions-41f7061b5381e6a1)
+
+running 21 tests
+test backwards_clock_recovers_without_replaying_old_input ... ok
+test corrupted_foreign_lengths_cannot_index_out_of_bounds ... ok
+test batch_descriptor_shapes_and_legacy_subnormal_match ... ok
+test fixed_point_extremes_are_saturated_or_rejected ... ok
+test forged_and_duplicate_commits_are_rejected ... ok
+test generation_overflow_has_c_unsigned_wrap_semantics ... ok
+test intermediate_ack_keeps_later_targets ... ok
+test invalid_motion_and_zero_end_replay_the_prefix ... ok
+test invalid_threshold_and_smallest_movement_remain_defined ... ok
+test invalid_topology_is_rejected_without_mutating_state ... ok
+test modern_direction_and_terminal_feedback ... ok
+test native_cancel_passes_through ... ok
+test one_switch_per_swipe_and_committed_disable_drains ... ok
+test owning_batch_drops_every_prior_event_at_every_failure_position ... ok
+test payload_all_short_buffers_and_invalid_phases_leave_bytes_untouched ... ok
+test payload_is_byte_exact_and_does_not_touch_tail ... ok
+test pending_capacity_and_timeout_are_bounded ... ok
+test successful_batch_owns_then_releases_all_events ... ok
+test uncommitted_disable_replays ... ok
+test unknown_foreign_values_are_not_rust_enum_undefined_behavior ... ok
+test million_event_adversarial_stream ... ok
+
+test result: ok. 21 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s
+
+     Running unittests src/lib.rs (target/release/deps/rheo_ffi-3b450e3d40c4fd0f)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/boundary.rs (target/release/deps/boundary-4a411ef470058daf)
+
+running 8 tests
+test corrupt_batch_count_and_missing_callbacks_are_rejected ... ok
+test encoder_accepts_uninitialized_output_and_caps_a_large_capacity ... ok
+test ffi_batch_failure_cleans_up_and_success_transfers_ownership ... ok
+test layout_query_handles_unknown_ids_and_slots ... ok
+test null_arguments_are_rejected ... ok
+test rejected_plan_does_not_touch_output ... ok
+test reset_and_plan_outputs_accept_uninitialized_storage ... ok
+test short_and_invalid_payloads_leave_output_unchanged ... ok
+
+test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests rheo_core
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests rheo_ffi
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Compiling rheo-core v0.2.0 (<checkout>/crates/rheo-core)
+   Compiling rheo-ffi v0.2.0 (<checkout>/crates/rheo-ffi)
+    Finished `release` profile [optimized] target(s) in 0.23s
+ld: warning: ignoring duplicate libraries: '-lSystem'
+PASS: all C/Rust struct sizes, alignments, field offsets and enum widths match
+ld: warning: ignoring duplicate libraries: '-lSystem'
+ok 1 - test_one_switch_per_gesture
+ok 2 - test_native_cancellation_is_not_swallowed
+ok 3 - test_disable_drains_committed_gesture
+ok 4 - test_disable_replays_pending_gesture
+ok 5 - test_nan_and_infinity_never_choose_direction
+ok 6 - test_minimum_progress_is_optional
+ok 7 - test_direction_inversion_and_terminal_fallback
+ok 8 - test_uncommitted_failure_replays_native
+ok 9 - test_edges_never_release_moving_terminal
+ok 10 - test_zero_motion_replays_begin_not_just_end
+ok 11 - test_foreign_events_do_not_change_ownership
+ok 12 - test_lost_end_and_clock_regression_recover
+ok 13 - test_duplicate_begin_is_new_ownership_boundary
+ok 14 - test_cancelled_owned_gesture_is_closed
+ok 15 - test_topology_rejects_missing_duplicate_or_overflow
+ok 16 - test_predictions_block_both_edges
+ok 17 - test_pending_targets_survive_intermediate_ack
+ok 18 - test_post_failure_does_not_advance_prediction
+ok 19 - test_duplicate_commit_is_rejected
+ok 20 - test_topology_reorder_invalidates_pending
+ok 21 - test_external_switch_adopts_live_state
+ok 22 - test_stale_snapshot_is_not_used
+ok 23 - test_expired_unacknowledged_post_is_not_retried_blindly
+ok 24 - test_pending_capacity_is_bounded
+ok 25 - test_query_started_before_post_does_not_erase_pending
+ok 26 - test_forged_plan_cannot_commit
+ok 27 - test_fixed1616_is_defined_at_extremes
+ok 28 - test_payload_byte_layout_and_size
+ok 29 - test_payload_rejects_short_buffers_without_writes
+ok 30 - test_prepare_failure_never_posts_partial_gesture
+ok 31 - test_batch_direction_phase_order_and_cleanup
+ok 32 - test_invalid_batch_parameters_allocate_nothing
+ok 33 - test_one_million_adversarial_events
+PASS: 33 test groups, including 1,000,000 adversarial events.
+ld: warning: ignoring duplicate libraries: '-lSystem'
+PASS: 1,000,000 differential gesture inputs plus feedback
+PASS: 200,000 differential prediction steps with commits
+PASS: 100,000 byte-exact payload/fixed-point comparisons
+PASS: 22 differential batch success/failure/direction cases
+upstream_source_sha256=e7ebc88fee331a8263a7fff4d658517c5840764095b115e1cd166f6965165659
+REPRODUCED: native overlay began passes but cancelled is swallowed
+REPRODUCED: disable during swipe leaves tracking set after ended
+REPRODUCED: NaN progress triggers a switch
+REPRODUCED: zero-motion began suppressed but orphan ended passed
+4/4 upstream control-flow defects reproduced with platform stubs.
+ld: warning: ignoring duplicate libraries: '-lSystem'
+/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/dispatch/once.h:89:2: runtime error: assumption is violated during execution
+SUMMARY: UndefinedBehaviorSanitizer: undefined-behavior /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/dispatch/once.h:89:2 
+SKIP: native macOS 27 payload roundtrip requires macOS 27
+PASS: native geometry and prepared-event smoke tests (no events posted)
+
+Rust tests, C ABI/layout checks, 33 legacy groups and differential checks passed.
+ASan/UBSan instrument the C harness/reference/adapter, NOT the stable Rust archive.
+
+
+=== local-build ===
+   Compiling rheo-core v0.2.0 (<checkout>/crates/rheo-core)
+   Compiling rheo-ffi v0.2.0 (<checkout>/crates/rheo-ffi)
+    Finished `release` profile [optimized] target(s) in 0.88s
+ld: warning: ignoring duplicate libraries: '-lSystem'
+dist/Rheo.app: replacing existing signature
+dist/Rheo.app: valid on disk
+dist/Rheo.app: satisfies its Designated Requirement
+
+Built <checkout>/dist/Rheo.app (Rust core + native AppKit adapter)
+
+
+=== local-clippy ===
+    Checking rheo-core v0.2.0 (<checkout>/crates/rheo-core)
+    Checking rheo-ffi v0.2.0 (<checkout>/crates/rheo-ffi)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.33s
+

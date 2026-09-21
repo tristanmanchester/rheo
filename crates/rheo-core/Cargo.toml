@@ -1,0 +1,10 @@
+[package]
+name = "rheo-core"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+description = "Allocation-free Space gesture state, prediction, payloads and event batches"
+
+[lints]
+workspace = true

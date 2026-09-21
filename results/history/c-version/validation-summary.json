@@ -1,0 +1,17 @@
+{
+  "date": "2026-09-21",
+  "portable_test_groups": 33,
+  "adversarial_events_per_test_run": 1000000,
+  "upstream_control_flow_reproductions": 4,
+  "batch_allocation_failure_positions": 9,
+  "libfuzzer_runs": 250000,
+  "clang_asan_ubsan": "pass",
+  "gcc_asan_ubsan": "pass",
+  "cmake_release_ctest": "pass",
+  "clang_core_static_analysis": "no diagnostics",
+  "native_build": "not run: no Apple SDK / macOS",
+  "native_runtime": "not run",
+  "native_latency_energy": "not measured",
+  "benchmark_samples": "linux-core-raw-samples.csv",
+  "benchmark_summary": "linux-core-benchmark.csv"
+}
