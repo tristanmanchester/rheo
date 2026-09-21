@@ -34,10 +34,10 @@ See the historical security document for the retained native implementation deta
 
 Private CGS/IOHID behavior is version-specific. The adapter's existing unsupported-
 version policy remains. Do not disable SIP, bypass Accessibility, modify Dock or
-run multiple interceptors together. App signing is ad hoc by default; notarization
-and automatic updates are not part of this source package.
+run multiple interceptors together. Local development builds use ad-hoc signing.
+Homebrew releases use Developer ID signing, hardened runtime, a secure timestamp,
+and a stapled Apple notarization ticket. Updates are installed through Homebrew.
 
-Validation is incomplete: Rust compilation, Rust tests, full ABI checks and native
-macOS execution were not available in this delivery environment. See VALIDATION.md
-before using it on a desktop. Report failures with OS/build version and minimal
+The original delivery environment lacked Rust and macOS execution. Subsequent
+local results are linked from [validation](docs/VALIDATION.md). Report failures with OS/build version and minimal
 reproduction, avoiding private window contents or input histories.

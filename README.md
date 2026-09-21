@@ -4,17 +4,14 @@ Instant macOS Space switching with trackpad swipes, keyboard shortcuts, and a co
 
 ## Install
 
-You need macOS 15–27, Apple Command Line Tools, Rust/Cargo 1.85 or later, and Python 3.
+On macOS 15–27, install with [Homebrew](https://brew.sh/):
 
 ```sh
-git clone https://github.com/tristanmanchester/rheo.git
-cd rheo
-./scripts/install.sh
+brew install --cask tristanmanchester/tap/rheo
+open -a Rheo
 ```
 
-The installer builds Rheo for your Mac, copies it to `~/Applications/Rheo.app`, and opens it. On first launch, enable **Rheo** in **System Settings > Privacy & Security > Accessibility** so it can intercept Space swipes. Quit any other Space-swipe interceptor before using Rheo.
-
-If you need Apple Command Line Tools, run `xcode-select --install`. Install Rust through [rustup](https://rustup.rs/).
+Homebrew installs the app and the `rheo` command. The release includes Apple Silicon and Intel builds. On first launch, enable **Rheo** in **System Settings > Privacy & Security > Accessibility** so it can intercept Space swipes. Quit any other Space-swipe interceptor before using Rheo.
 
 ## Use Rheo
 
@@ -22,13 +19,12 @@ Swipe between Spaces with your trackpad or press **Control–Option–Left/Right
 
 ### Command line
 
-With Rheo running, use its bundled executable:
+With Rheo running:
 
 ```sh
-APP="$HOME/Applications/Rheo.app/Contents/MacOS/rheo"
-"$APP" status
-"$APP" switch right
-"$APP" switch left
+rheo status
+rheo switch right
+rheo switch left
 ```
 
 `status` returns JSON with the app's runtime state, Accessibility permission, event-tap status, and hotkey registration.
@@ -40,17 +36,28 @@ APP="$HOME/Applications/Rheo.app/Contents/MacOS/rheo"
 | `show` | Restore the menu bar icon |
 | `quit` | Stop Rheo |
 
-For example, run `"$APP" hotkeys off` to disable the shortcuts. To start Rheo again:
+For example, run `rheo hotkeys off` to disable the shortcuts. To start Rheo again:
 
 ```sh
-open "$HOME/Applications/Rheo.app"
+open -a Rheo
 ```
 
 ### Update an installation
 
-Quit Rheo, move the existing `~/Applications/Rheo.app` aside, pull the source changes, and run `./scripts/install.sh` again. The installer preserves an existing installation by refusing to overwrite it.
+```sh
+brew update
+brew upgrade --cask tristanmanchester/tap/rheo
+open -a Rheo
+```
 
 ## Develop
+
+Building from source requires Apple Command Line Tools, Rust/Cargo 1.85 or later, and Python 3. Install the tools with `xcode-select --install` and [rustup](https://rustup.rs/), then clone the repository:
+
+```sh
+git clone https://github.com/tristanmanchester/rheo.git
+cd rheo
+```
 
 Build the app into `dist/Rheo.app`:
 
@@ -72,6 +79,10 @@ ARCHS="arm64 x86_64" ./scripts/build.sh
 ```
 
 The Rust workspace has no third-party Cargo dependencies. Builds use `--locked --offline` after the toolchain and target libraries are installed. CMake wraps the same build and test entrypoints.
+
+For a source installation, `./scripts/install.sh` builds, copies the app to `~/Applications/Rheo.app`, and opens it. It refuses to overwrite an existing app. The source-built CLI is available at `~/Applications/Rheo.app/Contents/MacOS/rheo`.
+
+See [releasing](docs/RELEASING.md) for the Homebrew packaging and publication steps.
 
 ### Test
 

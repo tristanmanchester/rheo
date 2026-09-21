@@ -31,6 +31,10 @@ mkdir -p dist/Rheo.app/Contents/MacOS
 if [[ ${#binaries[@]} == 1 ]]; then cp "${binaries[0]}" dist/Rheo.app/Contents/MacOS/rheo
 else xcrun lipo -create "${binaries[@]}" -output dist/Rheo.app/Contents/MacOS/rheo; fi
 cp src/macos/Info.plist dist/Rheo.app/Contents/Info.plist
-codesign --force --sign "${SIGN_IDENTITY:--}" dist/Rheo.app
+sign_flags=()
+if [[ ${SIGN_IDENTITY:--} != - ]]; then
+  sign_flags=(--options runtime --timestamp)
+fi
+codesign --force --sign "${SIGN_IDENTITY:--}" ${sign_flags[@]+"${sign_flags[@]}"} dist/Rheo.app
 codesign --verify --strict --verbose=2 dist/Rheo.app
 printf '\nBuilt %s/dist/Rheo.app (Rust core + native AppKit adapter)\n' "$PWD"
