@@ -21,7 +21,7 @@ for arch in ${ARCHS:-$(uname -m)}; do
   binary="build/native/$arch/rheo"
   "$cc" -isysroot "$sdk" -arch "$arch" -mmacosx-version-min=15.0 -std=c17 -O3 -DNDEBUG \
     -fno-fast-math -Wall -Wextra -Werror -I src/core -fobjc-arc -fblocks \
-    src/macos/main.m src/macos/platform.m src/macos/runtime.m "$SN_RUST_LIB" \
+    src/macos/main.m src/macos/platform.m src/macos/runtime.m src/macos/shortcuts.m "$SN_RUST_LIB" \
     "${SN_NATIVE_LIBS[@]}" -framework Cocoa -framework ApplicationServices -framework Carbon \
     -Wl,-dead_strip -o "$binary"
   binaries+=("$binary")

@@ -27,6 +27,10 @@ if [[ $(uname -s) == Darwin ]]; then
     "$SN_RUST_LIB" "${SN_NATIVE_LIBS[@]}" -framework Cocoa -framework ApplicationServices \
     -o build/tests/platform-tests
   build/tests/platform-tests
+  "$cc" -std=c17 -O1 -g -Wall -Wextra -Werror -UNDEBUG -I src/core -I src/macos \
+    -fobjc-arc -fblocks ${SN_SAN_FLAGS[@]+"${SN_SAN_FLAGS[@]}"} src/macos/shortcuts.m tests/shortcut_tests.m \
+    -framework Cocoa -framework ApplicationServices -o build/tests/shortcut-tests
+  build/tests/shortcut-tests
 fi
 printf '\nRust tests, C ABI/layout checks, 33 legacy groups and differential checks passed.\n'
 printf 'ASan/UBSan instrument the C harness/reference/adapter, NOT the stable Rust archive.\n'

@@ -47,8 +47,8 @@ static OSStatus hotkey_callback(EventHandlerCallRef call,EventRef event,void *in
     RheoRuntime *_runtime;
     NSUserDefaults *_preferences;
     NSStatusItem *_statusItem;
-    NSMenuItem *_stateItem, *_enabledItem, *_hotkeysItem;
-    BOOL _enabled, _hotkeysDesired, _hotkeysRegistered;
+    NSMenuItem *_stateItem, *_enabledItem, *_hotkeysItem, *_desktopShortcutsItem;
+    BOOL _enabled, _hotkeysDesired, _hotkeysRegistered, _desktopShortcuts;
     NSString *_lastCommand;
     EventHotKeyRef _left, _right;
     EventHandlerRef _handler;
@@ -65,10 +65,12 @@ static OSStatus hotkey_callback(EventHandlerCallRef call,EventRef event,void *in
     if (!_portSource) { [NSApp terminate:nil]; return; }
     CFRunLoopAddSource(CFRunLoopGetMain(),_portSource,kCFRunLoopCommonModes);
     _preferences=NSUserDefaults.standardUserDefaults;
-    [_preferences registerDefaults:@{@"interceptSwipes":@YES,@"hotkeys":@YES}];
+    [_preferences registerDefaults:@{@"interceptSwipes":@YES,@"hotkeys":@YES,@"desktopShortcuts":@NO}];
     _enabled=[_preferences boolForKey:@"interceptSwipes"];
     _hotkeysDesired=[_preferences boolForKey:@"hotkeys"];
+    _desktopShortcuts=[_preferences boolForKey:@"desktopShortcuts"];
     _runtime=[[RheoRuntime alloc] initWithEnabled:_enabled];
+    [_runtime setDesktopShortcutsEnabled:_desktopShortcuts];
     if (![_runtime start]) { NSLog(@"Rheo: cannot start event thread"); [NSApp terminate:nil]; return; }
     [self applyHotkeys];
     _statusItem=[[NSStatusBar systemStatusBar] statusItemWithLength:NSVariableStatusItemLength];
@@ -80,6 +82,7 @@ static OSStatus hotkey_callback(EventHandlerCallRef call,EventRef event,void *in
     [menu addItem:[NSMenuItem separatorItem]];
     _enabledItem=[menu addItemWithTitle:@"Intercept swipes" action:@selector(toggleEnabled:) keyEquivalent:@""];
     _hotkeysItem=[menu addItemWithTitle:@"Control–Option–Arrow hotkeys" action:@selector(toggleHotkeys:) keyEquivalent:@""];
+    _desktopShortcutsItem=[menu addItemWithTitle:@"Intercept desktop shortcuts" action:@selector(toggleDesktopShortcuts:) keyEquivalent:@""];
     [menu addItem:[NSMenuItem separatorItem]];
     [menu addItemWithTitle:@"Accessibility settings…" action:@selector(openPermissions:) keyEquivalent:@""];
     [menu addItemWithTitle:@"Copy diagnostics" action:@selector(copyDiagnostics:) keyEquivalent:@""];
@@ -147,6 +150,11 @@ static OSStatus hotkey_callback(EventHandlerCallRef call,EventRef event,void *in
         return @{@"result":_hotkeysDesired && !_hotkeysRegistered ? @"hotkeys_unavailable" : @"applied",
                  @"registered":@(_hotkeysRegistered)};
     }
+    if ([command isEqualToString:@"desktop-shortcuts on"] || [command isEqualToString:@"desktop-shortcuts off"]) {
+        _desktopShortcuts=[command hasSuffix:@"on"]; [_preferences setBool:_desktopShortcuts forKey:@"desktopShortcuts"];
+        [_runtime setDesktopShortcutsEnabled:_desktopShortcuts];
+        return @{@"result":@"applied",@"desktop_shortcuts":@(_desktopShortcuts)};
+    }
     if ([command isEqualToString:@"show"]) { _statusItem.visible=YES; return @{@"result":@"shown"}; }
     if ([command isEqualToString:@"quit"]) {
         dispatch_async(dispatch_get_main_queue(),^{ [NSApp terminate:nil]; });
@@ -161,10 +169,12 @@ static OSStatus hotkey_callback(EventHandlerCallRef call,EventRef event,void *in
     _stateItem.title=[NSString stringWithFormat:@"Rheo · %@",status[@"state"] ?: @"starting"];
     _enabledItem.state=_enabled ? NSControlStateValueOn : NSControlStateValueOff;
     _hotkeysItem.state=_hotkeysRegistered ? NSControlStateValueOn : NSControlStateValueOff;
+    _desktopShortcutsItem.state=_desktopShortcuts ? NSControlStateValueOn : NSControlStateValueOff;
     _hotkeysItem.title=_hotkeysDesired && !_hotkeysRegistered ? @"Hotkeys unavailable — click to disable" : @"Control–Option–Arrow hotkeys";
 }
 - (void)toggleEnabled:(id)sender { (void)sender; [self command:_enabled ? @"enabled off" : @"enabled on"]; }
 - (void)toggleHotkeys:(id)sender { (void)sender; [self command:_hotkeysDesired ? @"hotkeys off" : @"hotkeys on"]; }
+- (void)toggleDesktopShortcuts:(id)sender { (void)sender; [self command:_desktopShortcuts ? @"desktop-shortcuts off" : @"desktop-shortcuts on"]; }
 - (void)openPermissions:(id)sender {
     (void)sender;
     [NSWorkspace.sharedWorkspace openURL:[NSURL URLWithString:@"x-apple.systempreferences:com.apple.preference.security?Privacy_Accessibility"]];
@@ -199,6 +209,7 @@ static int cli(int argc,const char *argv[]) {
              "Run the app once, then use:\n"
              "  rheo status\n  rheo switch left|right\n"
              "  rheo enabled on|off\n  rheo hotkeys on|off\n"
+             "  rheo desktop-shortcuts on|off\n"
              "  rheo show\n  rheo quit\n"
              "Switch result 'posted' does not prove completion. No animation presets.");
         return 0;
@@ -206,7 +217,8 @@ static int cli(int argc,const char *argv[]) {
     if (argc==2 && !strcmp(argv[1],"--version")) { puts("0.2.2"); return 0; }
     BOOL valid=argc==2 && (!strcmp(argv[1],"status") || !strcmp(argv[1],"show") || !strcmp(argv[1],"quit"));
     valid=valid || (argc==3 && ((!strcmp(argv[1],"switch") && (!strcmp(argv[2],"left") || !strcmp(argv[2],"right"))) ||
-        ((!strcmp(argv[1],"enabled") || !strcmp(argv[1],"hotkeys")) && (!strcmp(argv[2],"on") || !strcmp(argv[2],"off")))));
+        ((!strcmp(argv[1],"enabled") || !strcmp(argv[1],"hotkeys") || !strcmp(argv[1],"desktop-shortcuts")) &&
+         (!strcmp(argv[2],"on") || !strcmp(argv[2],"off")))));
     if (!valid) { fputs("Invalid arguments; use rheo --help\n",stderr); return 2; }
     NSString *command=argc==2 ? [NSString stringWithUTF8String:argv[1]] : [NSString stringWithFormat:@"%s %s",argv[1],argv[2]];
     NSData *response=request(command);

@@ -5,6 +5,7 @@
 - (BOOL)start;
 - (void)stop;
 - (void)setEnabled:(BOOL)enabled;
+- (void)setDesktopShortcutsEnabled:(BOOL)enabled;
 - (void)refreshEnvironment;
 - (NSString *)requestSwitch:(sn_direction)direction;
 - (NSDictionary *)status;
