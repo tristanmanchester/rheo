@@ -128,7 +128,7 @@ static OSStatus hotkey_callback(EventHandlerCallRef call,EventRef event,void *in
 }
 - (NSDictionary *)diagnostics {
     NSMutableDictionary *status=[[_runtime status] mutableCopy] ?: [NSMutableDictionary new];
-    status[@"version"]=@"0.2.2"; status[@"hotkeys_requested"]=@(_hotkeysDesired);
+    status[@"version"]=@"0.2.3"; status[@"hotkeys_requested"]=@(_hotkeysDesired);
     status[@"hotkeys_registered"]=@(_hotkeysRegistered);
     status[@"last_command"]=_lastCommand ?: @"none";
     status[@"switch_completion_verified"]=@NO;
@@ -205,7 +205,7 @@ static OSStatus hotkey_callback(EventHandlerCallRef call,EventRef event,void *in
 
 static int cli(int argc,const char *argv[]) {
     if (argc==2 && (!strcmp(argv[1],"--help") || !strcmp(argv[1],"help"))) {
-        puts("Rheo 0.2.2 — instant macOS Space switching\n"
+        puts("Rheo 0.2.3 — instant macOS Space switching\n"
              "Run the app once, then use:\n"
              "  rheo status\n  rheo switch left|right\n"
              "  rheo enabled on|off\n  rheo hotkeys on|off\n"
@@ -214,7 +214,7 @@ static int cli(int argc,const char *argv[]) {
              "Switch result 'posted' does not prove completion. No animation presets.");
         return 0;
     }
-    if (argc==2 && !strcmp(argv[1],"--version")) { puts("0.2.2"); return 0; }
+    if (argc==2 && !strcmp(argv[1],"--version")) { puts("0.2.3"); return 0; }
     BOOL valid=argc==2 && (!strcmp(argv[1],"status") || !strcmp(argv[1],"show") || !strcmp(argv[1],"quit"));
     valid=valid || (argc==3 && ((!strcmp(argv[1],"switch") && (!strcmp(argv[2],"left") || !strcmp(argv[2],"right"))) ||
         ((!strcmp(argv[1],"enabled") || !strcmp(argv[1],"hotkeys") || !strcmp(argv[1],"desktop-shortcuts")) &&
