@@ -26,9 +26,14 @@ C batch, whose owner must release them exactly once. Actual delivery to Dock is 
 transactional or acknowledged. Raw callback pointers must remain valid and cannot
 unwind/longjmp, re-enter or mutate active state.
 
-The inherited adapter observes gesture/dock-control event types, cached Space/display
-metadata and Dock Accessibility overlay identifiers; it does not add a general
-keyboard monitor. Native event objects and prefix buffers remain transient and local.
+The adapter observes gesture/dock-control event types, cached Space/display
+metadata and Dock Accessibility overlay identifiers. Opting into **Intercept desktop
+shortcuts** also subscribes to key-down/up events using the existing Accessibility
+permission. It matches only the enabled, explicitly configured macOS desktop
+shortcuts; it never reads text or records keyboard events. A bounded table retains
+only key codes and source process IDs until release, to pair consumed presses with
+their releases. Keyboard subscription ends after the option is disabled and owned
+presses are released. Native event objects and prefix buffers remain transient and local.
 Status describes observed state and `posted` is not a completed-switch guarantee.
 See the historical security document for the retained native implementation details.
 

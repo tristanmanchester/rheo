@@ -1,5 +1,6 @@
 /* SPDX-License-Identifier: MIT */
 #import "runtime.h"
+#import "shortcuts.h"
 #include <pthread.h>
 #include <stdatomic.h>
 #include <string.h>
@@ -7,6 +8,7 @@
 @interface RheoRuntime ()
 - (void)run;
 - (void)health;
+- (sn_outcome)switchAtPointer:(sn_direction)direction;
 - (CGEventRef)handle:(CGEventRef)event type:(CGEventType)type proxy:(CGEventTapProxy)proxy;
 @end
 static void *thread_entry(void *context) {
@@ -30,6 +32,9 @@ static void health_callback(CFRunLoopTimerRef timer,void *info) {
     CFRunLoopSourceRef _tapSource;
     CFRunLoopTimerRef _healthTimer;
     CGEventSourceRef _eventSource;
+    CGEventMask _tapMask;
+    sn_shortcut _shortcuts[2];
+    sn_shortcut_state _shortcutState;
     sn_gesture _gesture;
     sn_prediction _predictions[SN_MAX_DISPLAYS];
     CGEventRef _buffer[SN_REPLAY_CAPACITY];
@@ -38,6 +43,8 @@ static void health_callback(CFRunLoopTimerRef timer,void *info) {
     uint32_t _physicalDisplay;
     uint64_t _environmentGeneration;
     atomic_bool _enabled, _tapRunning, _trusted, _commandPending;
+    atomic_bool _desktopShortcuts;
+    atomic_uint _shortcutCount;
     atomic_uint_fast64_t _posted, _edge, _failed, _replayed, _bufferFallbacks, _recoveries, _maximumCallbackNs;
 }
 - (instancetype)initWithEnabled:(BOOL)enabled {
@@ -47,6 +54,7 @@ static void health_callback(CFRunLoopTimerRef timer,void *info) {
         _supported=major>=15 && major<=27; _modern=major==27;
         atomic_init(&_enabled,enabled); atomic_init(&_tapRunning,false);
         atomic_init(&_trusted,false); atomic_init(&_commandPending,false);
+        atomic_init(&_desktopShortcuts,false); atomic_init(&_shortcutCount,0);
         atomic_init(&_posted,0); atomic_init(&_edge,0); atomic_init(&_failed,0);
         atomic_init(&_replayed,0); atomic_init(&_bufferFallbacks,0); atomic_init(&_recoveries,0);
         atomic_init(&_maximumCallbackNs,0);
@@ -115,21 +123,34 @@ static void health_callback(CFRunLoopTimerRef timer,void *info) {
         BOOL trusted=AXIsProcessTrusted(); atomic_store(&_trusted,trusted);
         if (!_supported || !trusted) {
             [self removeTap]; [self discardBuffer]; sn_gesture_reset(&_gesture);
+            memset(&_shortcutState,0,sizeof(_shortcutState));
             memset(_predictions,0,sizeof(_predictions)); return;
         }
         uint64_t now=sn_now_ns();
         if (_gesture.owner!=SN_IDLE && (now<_gesture.last_ns || now-_gesture.last_ns>SN_GESTURE_TIMEOUT_NS)) {
             [self discardBuffer]; sn_gesture_reset(&_gesture);
         }
-        BOOL wanted=atomic_load(&_enabled) || _gesture.owner>=SN_PENDING;
+        BOOL shortcuts=atomic_load(&_desktopShortcuts);
+        if (shortcuts) {
+            CFPreferencesAppSynchronize(CFSTR("com.apple.symbolichotkeys"));
+            NSDictionary *prefs=CFBridgingRelease(CFPreferencesCopyAppValue(CFSTR("AppleSymbolicHotKeys"),
+                CFSTR("com.apple.symbolichotkeys")));
+            sn_read_shortcuts(prefs,_shortcuts);
+            atomic_store(&_shortcutCount,(unsigned)_shortcuts[0].enabled+(unsigned)_shortcuts[1].enabled);
+        }
+        BOOL keys=shortcuts || sn_shortcuts_held(&_shortcutState);
+        CGEventMask mask=SN_EVENT_MASK | (keys ? CGEventMaskBit(kCGEventKeyDown)|CGEventMaskBit(kCGEventKeyUp) : 0);
+        BOOL wanted=atomic_load(&_enabled) || _gesture.owner>=SN_PENDING || keys;
         if (!wanted) {
             if (_tap) CGEventTapEnable(_tap,false);
             atomic_store(&_tapRunning,false); return;
         }
         if (_tap && !CFMachPortIsValid(_tap)) [self removeTap];
+        if (_tap && _tapMask!=mask && _gesture.owner==SN_IDLE) [self removeTap];
         if (!_tap) {
             _tap=CGEventTapCreate(kCGSessionEventTap,kCGHeadInsertEventTap,kCGEventTapOptionDefault,
-                SN_EVENT_MASK,tap_callback,(__bridge void *)self);
+                mask,tap_callback,(__bridge void *)self);
+            _tapMask=mask;
             if (_tap) {
                 _tapSource=CFMachPortCreateRunLoopSource(NULL,_tap,0);
                 if (_tapSource) CFRunLoopAddSource(_loop,_tapSource,kCFRunLoopCommonModes);
@@ -142,6 +163,13 @@ static void health_callback(CFRunLoopTimerRef timer,void *info) {
 }
 - (void)setEnabled:(BOOL)enabled {
     atomic_store(&_enabled,enabled);
+    if (_started) {
+        CFRunLoopPerformBlock(_loop,kCFRunLoopCommonModes,^{ [self health]; });
+        CFRunLoopWakeUp(_loop);
+    }
+}
+- (void)setDesktopShortcutsEnabled:(BOOL)enabled {
+    atomic_store(&_desktopShortcuts,enabled);
     if (_started) {
         CFRunLoopPerformBlock(_loop,kCFRunLoopCommonModes,^{ [self health]; });
         CFRunLoopWakeUp(_loop);
@@ -184,12 +212,20 @@ static void health_callback(CFRunLoopTimerRef timer,void *info) {
 - (CGEventRef)process:(CGEventRef)event type:(CGEventType)type proxy:(CGEventTapProxy)proxy {
     if (type==kCGEventTapDisabledByTimeout || type==kCGEventTapDisabledByUserInput) {
         [self discardBuffer]; sn_gesture_reset(&_gesture); memset(_predictions,0,sizeof(_predictions));
+        memset(&_shortcutState,0,sizeof(_shortcutState));
         atomic_fetch_add(&_recoveries,1);
-        if (_tap && atomic_load(&_enabled)) CGEventTapEnable(_tap,true);
+        if (_tap && (atomic_load(&_enabled) || atomic_load(&_desktopShortcuts))) CGEventTapEnable(_tap,true);
         atomic_store(&_tapRunning,_tap && CGEventTapIsEnabled(_tap));
         return event;
     }
     if (!event) return event;
+    if (type==kCGEventKeyDown || type==kCGEventKeyUp) {
+        return sn_route_shortcut(&_shortcutState,_shortcuts,atomic_load(&_desktopShortcuts),event,type,
+            ^sn_outcome(sn_direction direction) {
+                if (self->_gesture.owner!=SN_IDLE) return SN_FAILED;
+                return [self switchAtPointer:direction];
+            });
+    }
     int64_t raw=CGEventGetIntegerValueField(event,(CGEventField)55);
     if ((raw!=29 && raw!=30) || CGEventGetIntegerValueField(event,kCGEventSourceUnixProcessID)!=0 ||
         CGEventGetIntegerValueField(event,kCGEventSourceUserData)==SN_EVENT_MARKER) return event;
@@ -247,6 +283,17 @@ static void health_callback(CFRunLoopTimerRef timer,void *info) {
     if (elapsed>atomic_load(&_maximumCallbackNs)) atomic_store(&_maximumCallbackNs,elapsed);
     return result;
 }
+- (sn_outcome)switchAtPointer:(sn_direction)direction {
+    sn_snapshot snapshot={0};
+    if (![_monitor copySnapshot:&snapshot]) return SN_FAILED;
+    /* Injected keyboard events need not contain the current pointer location. */
+    CGEventRef location=CGEventCreate(NULL);
+    if (!location) return SN_FAILED;
+    CGPoint point=CGEventGetLocation(location); CFRelease(location);
+    const sn_display *display=sn_display_at_point(&snapshot,point);
+    if (!display) return SN_FAILED;
+    return [self postSwitch:direction physical:display->physical_id generation:snapshot.generation point:point];
+}
 - (NSString *)requestSwitch:(sn_direction)direction {
     if (!_started || !_supported) return @"unavailable";
     if (atomic_exchange(&_commandPending,true)) return @"busy";
@@ -257,17 +304,8 @@ static void health_callback(CFRunLoopTimerRef timer,void *info) {
         if (sn_now_ns()<=deadline) {
             if (self->_gesture.owner!=SN_IDLE) result=@"busy_real_gesture";
             else {
-                CGEventRef location=CGEventCreate(NULL);
-                sn_snapshot snapshot={0};
-                if (location && [self->_monitor copySnapshot:&snapshot]) {
-                    CGPoint point=CGEventGetLocation(location);
-                    const sn_display *d=sn_display_at_point(&snapshot,point);
-                    if (d) {
-                        sn_outcome outcome=[self postSwitch:direction physical:d->physical_id generation:snapshot.generation point:point];
-                        result=outcome==SN_POSTED ? @"posted" : outcome==SN_EDGE ? @"edge" : @"unavailable";
-                    } else result=@"unavailable";
-                } else result=@"unavailable";
-                if (location) CFRelease(location);
+                sn_outcome outcome=[self switchAtPointer:direction];
+                result=outcome==SN_POSTED ? @"posted" : outcome==SN_EDGE ? @"edge" : @"unavailable";
             }
         }
         atomic_store(&self->_commandPending,false);
@@ -280,12 +318,13 @@ static void health_callback(CFRunLoopTimerRef timer,void *info) {
 - (NSDictionary *)status {
     sn_snapshot snapshot={0}; BOOL copied=[_monitor copySnapshot:&snapshot]; uint64_t now=sn_now_ns();
     BOOL fresh=copied && sn_snapshot_fresh(&snapshot,now);
-    BOOL tap=atomic_load(&_tapRunning),enabled=atomic_load(&_enabled);
+    BOOL tap=atomic_load(&_tapRunning),enabled=atomic_load(&_enabled),shortcuts=atomic_load(&_desktopShortcuts);
     NSString *state=!_supported ? @"unsupported_os" : !atomic_load(&_trusted) ? @"accessibility_required" :
-        !enabled ? @"paused" : !tap ? @"tap_unavailable" : !fresh ? @"waiting_for_fresh_snapshot" :
+        !enabled && !shortcuts ? @"paused" : !tap ? @"tap_unavailable" : !fresh ? @"waiting_for_fresh_snapshot" :
         snapshot.overlay==SN_OVERLAY_ACTIVE ? @"native_overlay" : snapshot.overlay!=SN_OVERLAY_CLEAR ? @"overlay_unknown" :
         !snapshot.display_count ? @"topology_unknown" : @"ready";
     return @{@"state":state,@"enabled":@(enabled),@"tap_running":@(tap),
+        @"desktop_shortcuts":@(shortcuts),@"desktop_shortcuts_configured":@(atomic_load(&_shortcutCount)),
         @"accessibility":@(atomic_load(&_trusted)),@"os_supported":@(_supported),@"modern_payload":@(_modern),
         @"cgs_available":@(snapshot.cgs_available),@"snapshot_fresh":@(fresh),@"displays":@(snapshot.display_count),
         @"snapshot_age_ms":@(snapshot.observed_ns && now>=snapshot.observed_ns ? (now-snapshot.observed_ns)/1000000 : UINT64_MAX),

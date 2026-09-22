@@ -33,19 +33,21 @@ stop() {
   resident_pid=
 }
 check() {
-  "$binary" status | python3 -c 'import json,sys; s=json.load(sys.stdin); expected=sys.argv[1]=="on"; assert s["enabled"] is expected and s["hotkeys_requested"] is expected, s' "$1"
+  "$binary" status | python3 -c 'import json,sys; s=json.load(sys.stdin); expected=sys.argv[1]=="on"; assert s["enabled"] is expected and s["hotkeys_requested"] is expected and s["desktop_shortcuts"] is (sys.argv[2]=="on"), s' "$1" "$2"
 }
 start
-check on
+check on off
 "$binary" enabled off
 "$binary" hotkeys off
+"$binary" desktop-shortcuts on
 stop
 start
-check off
+check off on
 "$binary" enabled on
 "$binary" hotkeys on
+"$binary" desktop-shortcuts off
 stop
 start
-check on
+check on off
 stop
-echo 'PASS: real app defaults and both preference values survive relaunch.'
+echo 'PASS: real app defaults and all three preference values survive relaunch.'

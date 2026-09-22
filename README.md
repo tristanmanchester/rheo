@@ -17,6 +17,26 @@ Homebrew installs the app and the `rheo` command. The release includes Apple Sil
 
 Swipe between Spaces with your trackpad or press **Control–Option–Left/Right**. Open Rheo's menu bar menu to toggle **Intercept swipes** and **Control–Option–Arrow hotkeys**.
 
+### Mouse utilities and desktop shortcuts
+
+Some mouse utilities implement “Switch between desktops” by sending the macOS
+desktop keyboard shortcuts (usually **Control–Left/Right**). To give those actions
+Rheo's instant switching, enable **Intercept desktop shortcuts** in Rheo's menu,
+or run `rheo desktop-shortcuts on`. This option is off by default and works with
+physical keyboards and utilities from any vendor; existing mouse bindings stay unchanged.
+
+Rheo reads the enabled **Move left a space** and **Move right a space** bindings
+from **System Settings → Keyboard → Keyboard Shortcuts → Mission Control**.
+Only explicitly saved bindings using standard Shift/Control/Option/Command
+modifiers are supported. If diagnostics show `desktop_shortcuts_configured: 0`,
+configure those shortcuts in System Settings. Changes are picked up within a few
+seconds. Shifted variants and other shortcuts remain native unless explicitly
+assigned to these two actions.
+
+Each press switches once; key repeats are suppressed until release. When Rheo
+cannot safely post a switch, the original shortcut passes through to macOS.
+This setting is independent of swipe interception and Rheo's Control–Option hotkeys.
+
 ### Command line
 
 With Rheo running:
@@ -33,6 +53,7 @@ rheo switch left
 | --- | --- |
 | `enabled on` / `enabled off` | Enable or disable swipe interception |
 | `hotkeys on` / `hotkeys off` | Enable or disable Control–Option–Arrow shortcuts |
+| `desktop-shortcuts on` / `desktop-shortcuts off` | Intercept configured macOS desktop shortcuts |
 | `show` | Restore the menu bar icon |
 | `quit` | Stop Rheo |
 
