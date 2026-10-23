@@ -65,12 +65,12 @@ static void test_minimum_progress_is_optional(void) {
     sn_gesture_reset(&g); policy.minimum_progress=0;
     begins(&g); assert(send(&g,SN_HORIZONTAL,SN_CHANGED,DBL_TRUE_MIN,0).flags&SN_ATTEMPT);
 }
-static void test_direction_inversion_and_terminal_fallback(void) {
+static void test_physical_direction_and_terminal_fallback(void) {
     for (int modern=0;modern<2;++modern) for (int sign=-1;sign<=1;sign+=2) {
         policy.modern=modern; sn_gesture g={0}; begins(&g);
         sn_action a=send(&g,SN_HORIZONTAL,SN_ENDED,0,sign);
         assert(a.flags&SN_ATTEMPT); assert(a.terminal);
-        assert(a.direction==(modern ? -sign : sign));
+        assert(a.direction==sign);
         a=sn_gesture_feedback(&g,SN_POSTED,true,modern);
         assert(a.flags==(unsigned)(SN_DISCARD|(modern ? SN_NEUTRAL : SN_DROP)));
         assert(g.owner==SN_IDLE);
@@ -332,7 +332,7 @@ int main(void) {
     TEST(test_disable_replays_pending_gesture);
     TEST(test_nan_and_infinity_never_choose_direction);
     TEST(test_minimum_progress_is_optional);
-    TEST(test_direction_inversion_and_terminal_fallback);
+    TEST(test_physical_direction_and_terminal_fallback);
     TEST(test_uncommitted_failure_replays_native);
     TEST(test_edges_never_release_moving_terminal);
     TEST(test_zero_motion_replays_begin_not_just_end);

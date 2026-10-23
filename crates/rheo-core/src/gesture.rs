@@ -78,9 +78,11 @@ impl Action {
     }
 }
 
-fn direction(value: f64, threshold: f64, modern: bool) -> Option<Direction> {
+fn direction(value: f64, threshold: f64) -> Option<Direction> {
     if !value.is_finite() || value == 0.0 || value.abs() < threshold { return None; }
-    Some(if (value > 0.0) != modern { Direction::RIGHT } else { Direction::LEFT })
+    // Real gesture fields retain their sign on macOS 27. Only synthesized
+    // IOHID payloads reverse direction (see Shapes::new).
+    Some(if value > 0.0 { Direction::RIGHT } else { Direction::LEFT })
 }
 
 impl Gesture {
@@ -126,7 +128,7 @@ impl Gesture {
             let value = if terminal { event.velocity } else { event.progress };
             let mut threshold = if terminal { 0.0 } else { policy.minimum_progress };
             if !threshold.is_finite() || threshold < 0.0 { threshold = 0.0; }
-            if let Some(direction) = direction(value, threshold, policy.modern) {
+            if let Some(direction) = direction(value, threshold) {
                 return Action { flags: prefix | DROP | ATTEMPT, direction, terminal };
             }
             if terminal {
