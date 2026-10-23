@@ -51,7 +51,30 @@ fn invalid_motion_and_zero_end_replay_the_prefix() {
     }
 }
 #[test]
-fn modern_direction_and_terminal_feedback() {
+fn physical_swipe_direction_is_independent_of_synthetic_payload_format() {
+    // macOS 27.0.1 (26A434): real motion retains the legacy sign even though
+    // the generated IOHID gesture uses the opposite sign.
+    for modern in [false, true] {
+        for (motion, expected) in [(-0.25, Direction::LEFT), (0.25, Direction::RIGHT)] {
+            for phase in [Phase::CHANGED, Phase::ENDED] {
+                let p = Policy { modern, ..policy() };
+                let mut g = Gesture::default();
+                g.step(&event(Phase::BEGAN, 0.0, 0.0, 1), &p);
+                let input = if phase == Phase::CHANGED { event(phase, motion, 0.0, 2) }
+                    else { event(phase, 0.0, motion, 2) };
+                let action = g.step(&input, &p);
+                assert_ne!(action.flags & ATTEMPT, 0);
+                assert_eq!(action.direction, expected, "modern={modern}, phase={phase:?}");
+                let shapes = Shapes::new(modern, action.direction, 2000.0).unwrap();
+                let terminal = shapes.as_slice().iter().find(|s| !s.companion && s.phase == Phase::ENDED).unwrap();
+                let expected_sign = expected.0 as f64 * if modern { -1.0 } else { 1.0 };
+                assert_eq!(terminal.velocity_x, expected_sign * 2000.0);
+            }
+        }
+    }
+}
+#[test]
+fn physical_direction_and_modern_terminal_feedback() {
     for modern in [false, true] {
         for sign in [-1.0, 1.0] {
             let p = Policy { modern, ..policy() };
@@ -60,7 +83,7 @@ fn modern_direction_and_terminal_feedback() {
             let a = g.step(&event(Phase::ENDED, 0.0, sign, 2), &p);
             assert_eq!(a.flags, DROP | ATTEMPT);
             assert!(a.terminal);
-            assert_eq!(a.direction, Direction(if modern { -sign as i32 } else { sign as i32 }));
+            assert_eq!(a.direction, Direction(sign as i32));
             assert_eq!(g.feedback(Outcome::POSTED, true, modern).flags, DISCARD | if modern { NEUTRAL } else { DROP });
         }
     }

@@ -37,6 +37,10 @@ static void gestures(void) {
         if (rnd()%701==0) e.now_ns=0;
         sn_policy p={rnd()%9!=0,rnd()%7!=0,rnd()%2!=0,rnd()%2 ? 0.0 : floating()};
         sn_action a=sn_gesture_step(&rust,&e,&p),b=ref_sn_gesture_step(&c,&e,&p);
+        /* The frozen reference incorrectly reverses real macOS 27 motion.
+         * Normalize only its requested direction; ownership/flags/feedback
+         * and synthesized batches must still match exactly. */
+        if (p.modern && (b.flags&SN_ATTEMPT)) b.direction=(sn_direction)-b.direction;
         actions(a,b); assert(rust.owner==c.owner && rust.last_ns==c.last_ns);
         if (a.flags&SN_ATTEMPT) {
             sn_outcome o=(sn_outcome)(rnd()%3);
